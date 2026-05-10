@@ -8,10 +8,11 @@ const STATE = {
   LEADERBOARD: 'leaderboard',
 };
 
-let currentState = STATE.START;
-let prevState    = STATE.GAMEPLAY;
-let score        = 0;
-let lives        = PLAYER_LIVES;
+let currentState      = STATE.START;
+let prevState         = STATE.GAMEPLAY;
+let score             = 0;
+let lives             = PLAYER_LIVES;
+let leaderboardSource = 'gameover'; // 'gameover' | 'start'
 let lastTime     = 0;
 let level        = 1;
 let levelPhase   = 'transition'; // 'transition' | 'active'
@@ -360,6 +361,8 @@ async function submitScore() {
     try {
       const [weekly, allTime] = await Promise.all([fetchWeeklyTop3(), fetchAllTimeTop10()]);
       populateLeaderboard(weekly, allTime);
+      leaderboardSource = 'gameover';
+      document.getElementById('btn-play-again').textContent = 'PLAY AGAIN';
       showScreen(STATE.LEADERBOARD);
     } catch (err) {
       console.error('Leaderboard load failed:', err);
@@ -380,6 +383,8 @@ async function submitScore() {
     await saveScore(name, score);
     const [weekly, allTime] = await Promise.all([fetchWeeklyTop3(), fetchAllTimeTop10()]);
     populateLeaderboard(weekly, allTime);
+    leaderboardSource = 'gameover';
+    document.getElementById('btn-play-again').textContent = 'PLAY AGAIN';
     showScreen(STATE.LEADERBOARD);
   } catch (err) {
     console.error('Score submission failed:', err);
@@ -408,6 +413,23 @@ function populateLeaderboard(weekly, allTime) {
 document.getElementById('btn-start').addEventListener('click', startGame);
 document.getElementById('btn-submit').addEventListener('click', submitScore);
 document.getElementById('btn-play-again').addEventListener('click', () => showScreen(STATE.START));
+document.getElementById('btn-view-leaderboard').addEventListener('click', async () => {
+  const btn = document.getElementById('btn-view-leaderboard');
+  btn.textContent = 'LOADING…';
+  btn.disabled    = true;
+  try {
+    const [weekly, allTime] = await Promise.all([fetchWeeklyTop3(), fetchAllTimeTop10()]);
+    populateLeaderboard(weekly, allTime);
+    leaderboardSource = 'start';
+    document.getElementById('btn-play-again').textContent = 'BACK';
+    showScreen(STATE.LEADERBOARD);
+  } catch (err) {
+    console.error('Leaderboard load failed:', err);
+  } finally {
+    btn.textContent = 'LEADERBOARD';
+    btn.disabled    = false;
+  }
+});
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 

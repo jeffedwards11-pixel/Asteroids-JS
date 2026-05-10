@@ -3,6 +3,16 @@
 All notable changes to Asteroids-JS will be recorded here.
 Format is intended to be readable as release notes.
 
+## [2026-05-10] — v1.3 Leaderboard Access & Feedback
+
+### Added
+- Leaderboard now accessible from the Start Menu via a LEADERBOARD button — no game required to view scores
+- Back button replaces Play Again on the leaderboard when accessed from the Start Menu
+- Feedback form on both the Start Screen and Game Over screen — opens as a modal overlay, posts to Formspree, pre-fills player name on Game Over screen
+- GitHub repo link on Start Screen
+
+---
+
 ## [2026-05-10] — v1.2 Power-Ups, Lives & Polish
 
 ### Added

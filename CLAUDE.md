@@ -290,6 +290,123 @@ GAMEPLAY_HEIGHT = 670   // px; bottom 50px reserved for HUD
 ### Ship behaviour between levels
 Ship does NOT reset position or velocity between waves. Momentum carries over.
 
+## Phase 3
+
+### Scope
+- Feedback submission (Formspree)
+- Leaderboard access from Start Menu with Back navigation
+- High score highlight on leaderboard
+- Sound effects
+- Turn Radius power-up (new addition to loot table)
+- Mobile/touch support (separate fork — handled by nephew via GitHub repo)
+
+---
+
+### Feedback Submission
+
+#### Integration
+- **Service:** Formspree
+- **Endpoint:** Stored in `config.js` as `FORMSPREE_ENDPOINT`. Same file as Supabase credentials. Never committed.
+- Add `FORMSPREE_ENDPOINT` to the `.gitignore` notes and any setup documentation.
+
+#### Trigger Points
+- **Start Menu:** Small unobtrusive link-style button (e.g. `Send Feedback`) in a corner of the start screen.
+- **Game Over Screen:** Same small link-style element, positioned so it does not compete with the name entry flow.
+
+#### Form Behavior
+- Opens as a modal overlay on top of the current screen.
+- Game state does not change when the modal opens (no need to pause — nothing is running on these screens).
+- Fields:
+  - **Name** — optional text input. On the Game Over screen, pre-fill with the name the player just entered if available.
+  - **Message** — open text area, no character category enforcement.
+  - **Submit** button — posts to Formspree endpoint. On success, show a brief inline confirmation ("Thanks for the feedback!") and auto-close the modal after 2 seconds.
+  - **Cancel / X** — closes modal with no submission.
+- Formspree handles routing and storage. No feedback data touches Supabase.
+
+#### File Responsibilities
+- Feedback form logic lives in a new `feedback.js` file.
+- `feedback.js` imports `FORMSPREE_ENDPOINT` from `config.js`.
+- `game.js` calls into `feedback.js` to open the modal — no Formspree logic bleeds into `game.js`.
+
+---
+
+### Leaderboard from Start Menu
+
+- Add a `View Leaderboard` button to the Start Menu screen.
+- Clicking it transitions to `STATE.LEADERBOARD`.
+- When accessed from the Start Menu, the leaderboard displays a **Back** button that returns to `STATE.START`.
+- When accessed from the Game Over flow, the leaderboard does **not** show a Back button — existing auto-loop behavior is unchanged.
+- Track entry point via a `leaderboardSource` flag (`'start'` or `'gameover'`) set before transitioning to `STATE.LEADERBOARD`. The leaderboard render checks this flag to determine whether to show the Back button.
+
+---
+
+### High Score Highlight
+
+- After a player submits their name and score, compare their score against the current leaderboard data already fetched.
+- If the player's score appears in the Top 10 all-time or Top 3 this week, highlight their row on the leaderboard with a distinct visual treatment (bold, different color, or an indicator glyph — exact style deferred to Phase 4 graphical update).
+- No additional Supabase query required — use the data already returned from the post-game leaderboard fetch.
+
+---
+
+### Sound Effects
+
+- All audio handled via the Web Audio API. No external libraries.
+- A new `audio.js` file owns all sound generation and playback.
+- `game.js` calls named functions from `audio.js` (e.g. `playShoot()`, `playExplosion()`, `playPowerUp()`). No audio logic in `game.js`.
+- Sound events to implement:
+
+| Event | Trigger |
+|---|---|
+| Shoot | Player fires a bullet |
+| Explosion (large) | Large asteroid destroyed |
+| Explosion (medium) | Medium asteroid destroyed |
+| Explosion (small) | Small asteroid destroyed |
+| Power-up pickup | Player collects a power-up object |
+| Sonic Wave | Sonic Wave triggered |
+| Level transition | Level banner appears |
+| Game over | Ship destroyed with no lives remaining |
+| Full Stop | Full Stop activated |
+| Reaction Enhancement | Reaction Enhancement activated |
+
+- Mute toggle should be accessible during gameplay. Recommend `M` key. HUD does not need to display mute state in Phase 3 — defer to Phase 4.
+
+---
+
+### Turn Radius Power-Up
+
+#### Overview
+- **Type:** Permanent Upgrade (2 Tiers)
+- **Letter label on pickup object:** `TR`
+- **Effect:** Improves the ship's rotation speed (turn rate).
+- **Tier 1:** +30% turn rate over base
+- **Tier 2:** +60% turn rate over base (flat, not compounding)
+- **Independent** of Accel/Decel Boost and Brakes. Not affected by any temporary buff.
+- **Lost on ship destruction.**
+
+#### Loot Table Addition
+Add Turn Radius to the loot table between Spread Shot Tier 2 and Reaction Enhancement:
+
+| Power-Up | Type | Base Weight | Level Eligible | Weight Scaling |
+|---|---|---|---|---|
+| Turn Radius (Tier 1) | Permanent (Tier 1 of 2) | 10 | 2+ | None |
+| Turn Radius (Tier 2) | Permanent (Tier 2 of 2) | 6 | After Tier 1 owned | None |
+
+#### HUD
+- Left side permanent upgrade indicators. Add: `TURN 1` / `TURN 2` — dim when not owned, bright when owned.
+
+#### Pause Menu Addition
+Add to the power-up reference list in the pause menu:
+
+---
+
+### Mobile / Touch Support
+
+- Handled as a **separate fork** of the main GitHub repo by nephew.
+- Main repo (`jeffedwards11-pixel/Asteroids-JS`) is the source of truth.
+- Fork owner is responsible for rebasing against main as Phase 3 and Phase 4 ship.
+- No mobile-specific logic, breakpoints, or touch event handling enters the main repo.
+- Coordinate on the HUD layout before Phase 4 graphical update since touch controls will need canvas space.
+
 ## Changelog
 After every completed task, update CHANGELOG.md in the project root.
 Use this format:

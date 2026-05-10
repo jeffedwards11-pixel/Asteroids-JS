@@ -29,6 +29,8 @@
     .section-label { font-size: 14px; color: #888; letter-spacing: 2px; margin-top: 16px; }
     #score-display.hidden { display: none; }
     #screen-leaderboard { background: rgba(0,0,0,0.55); padding: 32px 48px; border: 1px solid rgba(255,255,255,0.15); }
+    .link-btn { background: none !important; border: none !important; color: #555; font-family: monospace; font-size: 13px; letter-spacing: 1px; cursor: pointer; padding: 0; }
+    .link-btn:hover { background: none !important; color: #999 !important; }
   </style>
 </head>
 <body>
@@ -43,7 +45,11 @@
     <h1>ASTEROIDS</h1>
     <p>WASD to move &nbsp;|&nbsp; Space to shoot</p>
     <button id="btn-start">PLAY</button>
-    <a href="https://github.com/jeffedwards11-pixel/Asteroids-JS" target="_blank" style="font-size:13px; color:#555; text-decoration:none; letter-spacing:1px;">github</a>
+    <button id="btn-view-leaderboard">LEADERBOARD</button>
+    <div style="display:flex; gap:24px; margin-top:4px;">
+      <a href="https://github.com/jeffedwards11-pixel/Asteroids-JS" target="_blank" style="font-size:13px; color:#555; text-decoration:none; letter-spacing:1px;">github</a>
+      <button class="link-btn" id="btn-feedback-start">send feedback</button>
+    </div>
   </div>
 
   <!-- Game over screen -->
@@ -53,6 +59,7 @@
     <label for="name-input">Enter your name:</label>
     <input id="name-input" type="text" maxlength="20" placeholder="YOUR NAME" />
     <button id="btn-submit">SUBMIT SCORE</button>
+    <button class="link-btn" id="btn-feedback-gameover">send feedback</button>
   </div>
 
   <!-- Leaderboard screen -->
@@ -65,11 +72,26 @@
     <button id="btn-play-again">PLAY AGAIN</button>
   </div>
 
+  <!-- Feedback modal -->
+  <div id="modal-feedback" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); align-items:center; justify-content:center; z-index:100;">
+    <div style="background:rgba(0,0,0,0.92); border:1px solid rgba(255,255,255,0.15); padding:32px 40px; display:flex; flex-direction:column; gap:16px; width:400px; max-width:90vw;">
+      <h2>FEEDBACK</h2>
+      <input id="feedback-name" type="text" maxlength="40" placeholder="YOUR NAME (OPTIONAL)" />
+      <textarea id="feedback-message" rows="4" placeholder="YOUR MESSAGE" style="background:none; border:1px solid rgba(255,255,255,0.25); color:white; font-family:monospace; font-size:16px; padding:8px; outline:none; resize:vertical;"></textarea>
+      <p id="feedback-status" style="font-size:14px; color:#aaa; min-height:18px; margin:0;"></p>
+      <div style="display:flex; gap:12px;">
+        <button id="feedback-submit">SUBMIT</button>
+        <button id="feedback-cancel" style="border-color:rgba(255,255,255,0.25); color:rgba(255,255,255,0.45);">CANCEL</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Scripts — order matters -->
   <script src="config.js"></script>
   <script src="constants.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="leaderboard.js"></script>
+  <script src="feedback.js"></script>
   <script src="game.js"></script>
 
 </body>
