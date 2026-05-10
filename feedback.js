@@ -30,15 +30,20 @@
     submitBtn.disabled    = true;
 
     try {
-      const res = await fetch(FORMSPREE_ENDPOINT, {
+      const res  = await fetch(FORMSPREE_ENDPOINT, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body:    JSON.stringify({ name: nameEl.value.trim() || 'Anonymous', message }),
       });
-      if (!res.ok) throw new Error('submit failed');
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        console.error('Formspree rejected submission:', res.status, data);
+        throw new Error();
+      }
       statusEl.textContent = 'Thanks for the feedback!';
       setTimeout(close, 2000);
-    } catch {
+    } catch (err) {
+      console.error('Feedback submission error:', err);
       submitBtn.textContent = 'ERROR — TRY AGAIN';
       submitBtn.disabled    = false;
     }
