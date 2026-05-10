@@ -3,6 +3,33 @@
 All notable changes to Asteroids-JS will be recorded here.
 Format is intended to be readable as release notes.
 
+## [2026-05-10] — v1.2 Power-Ups, Lives & Polish
+
+### Added
+- **Player lives** — 3 lives per game; dying respawns the ship at center with 2 seconds of invulnerability (ship blinks during this window). Game over only when all lives are lost.
+- **Power-up system** — one power-up drops per level (starting level 2) based on a weighted loot table. Power-ups float across the screen and expire after 10 seconds.
+- **Brakes** (permanent) — press S to apply reverse thrust
+- **Spread Shot** (2 tiers, permanent) — Tier 1: 3 bullets in a 30° arc. Tier 2: 5 bullets in a 60° arc.
+- **Multi-Shot** (temporary, 5 sec) — hold Space for full-auto fire at 0.05s intervals
+- **Accel Boost** (temporary, 8 sec) — 50% increase to thrust and braking
+- **Full Stop** (3 uses, key 1) — instantly zeros ship momentum
+- **Reaction Enhancement** (manual trigger, key 2) — slows all non-player objects by 50% for 5 seconds
+- **Sonic Wave** (manual trigger, key 3) — emits a visible expanding ring from the ship; asteroids caught in the ring are destroyed or downgraded. Child fragments from the wave are immune to the same blast.
+- **Shield** (passive, one-time) — absorbs one direct hit; the colliding asteroid is destroyed or split, children launch away from the player, and player velocity is dampened. Shield hitbox is 50% larger than the ship.
+- **HUD strip** — fixed panel at the bottom of the canvas shows all power-up slots (dim = inactive, bright = active/held), lives as ship icons, and timers/use counts for active items
+- **Pause menu** (P key) — freezes the game and shows a reference card listing every power-up, its label letter, and a one-line description
+- **Debug/developer mode** (backtick, localhost only) — panel in the top-right corner; grants individual power-ups, jumps to any level, toggles invincibility. Scores from sessions where debug was opened are blocked from the leaderboard.
+
+### Changed
+- Player ship recolored to teal (`#40ffcc`); asteroids remain white for contrast
+- Bullets recolored to orange (`#ffa040`)
+- Spread Shot Tier 2 widened from 45° to 60° and increased from 3 to 5 bullets
+- Multi-Shot changed from burst-per-trigger to continuous full-auto for the duration
+- Sonic Wave changed from an instant screen-clear to a physical expanding ring with visual effect
+
+### Fixed
+- Shield no longer kills the player on the same hit that destroys the shield
+
 ## [2026-05-10] — v1.1 Levels
 
 ### Added
