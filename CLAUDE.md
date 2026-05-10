@@ -25,7 +25,7 @@ Shareable via URL — no installs required for players.
 - Keep game logic and leaderboard logic completely separate
 
 ## Game Screens / State Flow
-START SCREEN → GAMEPLAY → GAME OVER → NAME ENTRY → LEADERBOARD → START SCREEN
+START SCREEN → GAMEPLAY → LEVEL TRANSITION → GAMEPLAY → … → GAME OVER → NAME ENTRY → LEADERBOARD → START SCREEN
 
 ## Supabase Schema
 ```sql
@@ -52,10 +52,63 @@ scores (
 
 ## Phase 2 (do not build yet, just be aware)
 - Difficulty settings
-- Levels
+- Asteroid collision mechanics
 - Lives
-- Power ups
+- Power ups: Brakes, Multi Shot, Spread Shot, Sonic Wave, Acceleration/Deceleration, Full Stop
 - Visual polish and sound
+
+
+## Phase 2 — Levels (designed, not yet built)
+
+### Model: Wave-based
+All asteroids (including fragments) must be cleared to advance. No continuous spawning during a wave. When the wave is cleared, a level transition banner is shown, then the next wave begins.
+
+### HUD during gameplay
+Display both score and level number on screen at all times during gameplay.
+
+### Staggered spawn-in
+Asteroids do not all appear at once. They spawn in one by one with a delay (`LEVEL_SPAWN_INTERVAL_BASE`). This delay shortens as levels progress.
+
+### Difficulty cycle (repeats every 3 levels)
+- **+1 count tier** (levels 1, 4, 7, 10…): more large asteroids per wave
+- **+1 speed tier** (levels 2, 5, 8, 11…): all asteroids move faster
+- **+1 interval tier** (levels 3, 6, 9, 12…): spawn-in delay decreases
+
+### Difficulty table (first 7 levels)
+| Level | Large asteroid count | Speed multiplier | Spawn-in interval |
+|-------|---------------------|-----------------|-------------------|
+| 1     | 3                   | 1.0×            | 1.5s              |
+| 2     | 3                   | 1.2×            | 1.5s              |
+| 3     | 3                   | 1.2×            | 1.2s              |
+| 4     | 4                   | 1.2×            | 1.2s              |
+| 5     | 4                   | 1.4×            | 1.2s              |
+| 6     | 4                   | 1.4×            | 0.9s              |
+| 7     | 5                   | 1.4×            | 0.9s              |
+
+### Formulas (level N, 1-indexed)
+```js
+countTier    = Math.floor((level - 1) / 3)   // 0,0,0,1,1,1,2…
+speedTier    = Math.floor((level + 1) / 3)   // 0,1,1,1,2,2,2…
+intervalTier = Math.floor(level / 3)         // 0,0,1,1,1,2,2…
+
+asteroidCount  = LEVEL_ASTEROID_BASE + countTier * LEVEL_ASTEROID_INCREMENT
+speedMult      = LEVEL_SPEED_MULTIPLIER ** speedTier
+spawnInterval  = max(LEVEL_SPAWN_INTERVAL_MIN, LEVEL_SPAWN_INTERVAL_BASE - intervalTier * LEVEL_SPAWN_INTERVAL_DECREMENT)
+```
+
+### Constants to add to constants.js
+```
+LEVEL_ASTEROID_BASE            = 3
+LEVEL_ASTEROID_INCREMENT       = 1
+LEVEL_SPEED_MULTIPLIER         = 1.2
+LEVEL_SPAWN_INTERVAL_BASE      = 1.5   // seconds between staggered spawns
+LEVEL_SPAWN_INTERVAL_DECREMENT = 0.3
+LEVEL_SPAWN_INTERVAL_MIN       = 0.3
+LEVEL_TRANSITION_DURATION      = 2     // seconds to show level banner
+```
+
+### Ship behaviour between levels
+Ship does NOT reset position or velocity between waves. Momentum carries over.
 
 ## Changelog
 After every completed task, update CHANGELOG.md in the project root.

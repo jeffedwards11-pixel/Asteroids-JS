@@ -27,6 +27,8 @@
     th, td { padding: 8px 16px; text-align: left; font-size: 18px; }
     th { color: #aaa; border-bottom: 1px solid #444; }
     .section-label { font-size: 14px; color: #888; letter-spacing: 2px; margin-top: 16px; }
+    #score-display.hidden { display: none; }
+    #screen-leaderboard { background: rgba(0,0,0,0.55); padding: 32px 48px; border: 1px solid rgba(255,255,255,0.15); }
   </style>
 </head>
 <body>
@@ -34,7 +36,7 @@
   <canvas id="gameCanvas"></canvas>
 
   <!-- Live score -->
-  <div id="score-display" class="hidden">SCORE: <span id="score-value">0</span></div>
+  <div id="score-display" class="hidden">SCORE: <span id="score-value">0</span>&nbsp;&nbsp;&nbsp;LEVEL: <span id="level-value">1</span></div>
 
   <!-- Start screen -->
   <div id="screen-start" class="screen">

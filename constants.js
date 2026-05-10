@@ -22,7 +22,14 @@ const ASTEROID_SMALL_RADIUS = 15;
 const ASTEROID_LARGE_SPEED = 80;
 const ASTEROID_MEDIUM_SPEED = 130;
 const ASTEROID_SMALL_SPEED = 200;
-const ASTEROID_SPAWN_RATE = 0.8; // seconds between spawns
+// Level progression
+const LEVEL_ASTEROID_BASE            = 3;
+const LEVEL_ASTEROID_INCREMENT       = 1;
+const LEVEL_SPEED_MULTIPLIER         = 1.2;
+const LEVEL_SPAWN_INTERVAL_BASE      = 1.5;  // seconds between staggered wave spawns
+const LEVEL_SPAWN_INTERVAL_DECREMENT = 0.3;
+const LEVEL_SPAWN_INTERVAL_MIN       = 0.3;
+const LEVEL_TRANSITION_DURATION      = 2;    // seconds to show level banner
 const ASTEROID_SPLIT_COUNT = 2;  // children per split
 const ASTEROID_SPAWN_SPEED_MIN = 40;
 const ASTEROID_SPAWN_SPEED_MAX = 100;

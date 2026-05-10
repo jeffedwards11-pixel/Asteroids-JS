@@ -10,6 +10,13 @@ const STATE = {
 let currentState = STATE.START;
 let score = 0;
 let lastTime = 0;
+let level = 1;
+let levelPhase = 'transition'; // 'transition' | 'active'
+let levelTimer = 0;
+let asteroidsToSpawn = 0;
+let waveSpawnTimer = 0;
+let levelSpeedMult = 1;
+let levelSpawnInterval = LEVEL_SPAWN_INTERVAL_BASE;
 
 // ── Canvas ────────────────────────────────────────────────────────────────────
 
@@ -36,6 +43,7 @@ const screens = {
 };
 const scoreDisplay = document.getElementById('score-display');
 const scoreValue   = document.getElementById('score-value');
+const levelValue   = document.getElementById('level-value');
 
 function showScreen(state) {
   currentState = state;
@@ -52,17 +60,44 @@ function showScreen(state) {
 
 // ── Game lifecycle ────────────────────────────────────────────────────────────
 
+function getLevelParams(lvl) {
+  const countTier    = Math.floor((lvl - 1) / 3);
+  const speedTier    = Math.floor((lvl + 1) / 3);
+  const intervalTier = Math.floor(lvl / 3);
+  return {
+    count:         LEVEL_ASTEROID_BASE + countTier * LEVEL_ASTEROID_INCREMENT,
+    speedMult:     Math.pow(LEVEL_SPEED_MULTIPLIER, speedTier),
+    spawnInterval: Math.max(LEVEL_SPAWN_INTERVAL_MIN,
+                     LEVEL_SPAWN_INTERVAL_BASE - intervalTier * LEVEL_SPAWN_INTERVAL_DECREMENT),
+  };
+}
+
+function startLevel() {
+  const params      = getLevelParams(level);
+  levelSpeedMult    = params.speedMult;
+  levelSpawnInterval = params.spawnInterval;
+  asteroidsToSpawn  = params.count;
+  waveSpawnTimer    = levelSpawnInterval; // fire first spawn immediately when active begins
+  levelPhase        = 'transition';
+  levelTimer        = LEVEL_TRANSITION_DURATION;
+  asteroids         = [];
+  bullets           = [];
+  levelValue.textContent = level;
+}
+
 function startGame() {
-  score = 0;
+  score  = 0;
+  level  = 1;
   scoreValue.textContent = '0';
-  player     = new Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
-  bullets    = [];
-  asteroids  = [];
-  spawnTimer = 0;
+  player  = new Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+  bullets = [];
   showScreen(STATE.GAMEPLAY);
+  startLevel();
 }
 
 function triggerGameOver() {
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
   showScreen(STATE.GAMEOVER);
   document.getElementById('final-score').textContent = `Final score: ${score}`;
   document.getElementById('btn-submit').textContent = 'SUBMIT SCORE';
@@ -257,6 +292,11 @@ class Asteroid {
   update(dt) {
     this.x += this.vx * dt;
     this.y += this.vy * dt;
+
+    if (this.x < 0) this.x += SCREEN_WIDTH;
+    if (this.x > SCREEN_WIDTH)  this.x -= SCREEN_WIDTH;
+    if (this.y < 0) this.y += SCREEN_HEIGHT;
+    if (this.y > SCREEN_HEIGHT) this.y -= SCREEN_HEIGHT;
   }
 
   draw() {
@@ -286,36 +326,25 @@ class Asteroid {
     });
   }
 
-  isOffScreen() {
-    const m = this.radius * 2;
-    return this.x < -m || this.x > SCREEN_WIDTH + m ||
-           this.y < -m || this.y > SCREEN_HEIGHT + m;
-  }
 }
 
 // ── Spawner ───────────────────────────────────────────────────────────────────
 
-let spawnTimer = 0;
-
 const SPAWN_EDGES = [
-  { dir: [ 1,  0], pos: t => [-ASTEROID_LARGE_RADIUS,              t * SCREEN_HEIGHT] },
-  { dir: [-1,  0], pos: t => [SCREEN_WIDTH + ASTEROID_LARGE_RADIUS, t * SCREEN_HEIGHT] },
+  { dir: [ 1,  0], pos: t => [-ASTEROID_LARGE_RADIUS,               t * SCREEN_HEIGHT] },
+  { dir: [-1,  0], pos: t => [SCREEN_WIDTH + ASTEROID_LARGE_RADIUS,  t * SCREEN_HEIGHT] },
   { dir: [ 0,  1], pos: t => [t * SCREEN_WIDTH, -ASTEROID_LARGE_RADIUS] },
   { dir: [ 0, -1], pos: t => [t * SCREEN_WIDTH,  SCREEN_HEIGHT + ASTEROID_LARGE_RADIUS] },
 ];
 
-const SPAWN_TIERS = [ASTEROID_LARGE, ASTEROID_MEDIUM, ASTEROID_SMALL];
-
-function spawnAsteroid() {
+function spawnWaveAsteroid() {
   const edge  = SPAWN_EDGES[Math.floor(Math.random() * SPAWN_EDGES.length)];
-  const speed = ASTEROID_SPAWN_SPEED_MIN + Math.random() * (ASTEROID_SPAWN_SPEED_MAX - ASTEROID_SPAWN_SPEED_MIN);
-  const angleOffset = -30 + Math.random() * 60; // ±30°
+  const base  = ASTEROID_SPAWN_SPEED_MIN + Math.random() * (ASTEROID_SPAWN_SPEED_MAX - ASTEROID_SPAWN_SPEED_MIN);
+  const speed = base * levelSpeedMult;
+  const angleOffset = -30 + Math.random() * 60;
   const { vx, vy } = rotateVec(edge.dir[0] * speed, edge.dir[1] * speed, angleOffset);
-
   const [x, y] = edge.pos(Math.random());
-  const tier = SPAWN_TIERS[Math.floor(Math.random() * SPAWN_TIERS.length)];
-
-  const a = new Asteroid(x, y, tier);
+  const a = new Asteroid(x, y, ASTEROID_LARGE);
   a.vx = vx;
   a.vy = vy;
   asteroids.push(a);
@@ -357,21 +386,35 @@ function checkCollisions() {
 }
 
 function update(dt) {
+  if (levelPhase === 'transition') {
+    player.update(dt);
+    levelTimer -= dt;
+    if (levelTimer <= 0) levelPhase = 'active';
+    return;
+  }
+
   player.update(dt);
 
   bullets = bullets.filter(b => !b.expired);
   for (const b of bullets) b.update(dt);
 
-  spawnTimer += dt;
-  if (spawnTimer >= ASTEROID_SPAWN_RATE) {
-    spawnTimer = 0;
-    spawnAsteroid();
+  if (asteroidsToSpawn > 0) {
+    waveSpawnTimer += dt;
+    if (waveSpawnTimer >= levelSpawnInterval) {
+      waveSpawnTimer = 0;
+      spawnWaveAsteroid();
+      asteroidsToSpawn--;
+    }
   }
 
-  asteroids = asteroids.filter(a => !a.isOffScreen());
   for (const a of asteroids) a.update(dt);
-
   checkCollisions();
+
+  if (currentState !== STATE.GAMEPLAY) return;
+  if (asteroidsToSpawn === 0 && asteroids.length === 0) {
+    level++;
+    startLevel();
+  }
 }
 
 function draw() {
@@ -380,6 +423,16 @@ function draw() {
   player.draw();
   for (const b of bullets) b.draw();
   for (const a of asteroids) a.draw();
+
+  if (levelPhase === 'transition') {
+    ctx.save();
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 48px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`LEVEL ${level}`, SCREEN_WIDTH / 2, SCREEN_HEIGHT * 0.2);
+    ctx.restore();
+  }
 }
 
 // ── Game loop ─────────────────────────────────────────────────────────────────
@@ -390,7 +443,7 @@ function gameLoop(timestamp) {
 
   if (currentState === STATE.GAMEPLAY) {
     update(dt);
-    draw();
+    if (currentState === STATE.GAMEPLAY) draw();
   }
 
   requestAnimationFrame(gameLoop);
