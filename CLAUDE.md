@@ -149,10 +149,10 @@ LEVEL_TRANSITION_DURATION      = 2     // seconds to show level banner
 
 #### Multi-Shot
 - **Type:** Temporary Buff
-- **Duration:** 8 seconds
+- **Duration:** 5 seconds
 - **HUD:** APPEARS_IN_HUD — show label + countdown timer
-- **Effect:** Overrides standard fire mode. Reduces fire rate to 0.5 shots/sec but fires a spread burst of 6 bullets over 0.2 seconds per trigger.
-- **Spread Shot interaction:** When both Multi-Shot and Spread Shot are active simultaneously, each of the 6 bullets fires in the Spread Shot arc — 18 bullets total per trigger.
+- **Effect:** Overrides standard fire mode. Enables continuous full-auto fire at 0.05s intervals (hold Space).
+- **Spread Shot interaction:** When both Multi-Shot and Spread Shot are active simultaneously, each auto-fire shot fires in the Spread Shot arc.
 - **Stack/Limit:** Does not stack. Cannot drop if already active.
 
 ---
@@ -160,16 +160,26 @@ LEVEL_TRANSITION_DURATION      = 2     // seconds to show level banner
 #### Spread Shot
 - **Type:** Permanent Upgrade (2 Tiers)
 - **Tier 1 Effect:** Player fires 3 bullets in a 30° arc instead of a single shot.
-- **Tier 2 Effect:** Arc widens to 45°. Bullet count remains 3.
+- **Tier 2 Effect:** Arc widens to 60°. Bullet count increases to 5.
 - **Stack/Limit:** Tier 1 must be owned before Tier 2 enters the loot pool. Each tier is a one-time upgrade. Lost on ship destruction.
 - **Note:** Compatible with Multi-Shot. Both can be active simultaneously.
 
 ---
 
 #### Sonic Wave
-- **Type:** Consumable (triggers on pickup)
-- **Effect:** On collection, emits a sonic blast centered on the player's position. Destroys all small asteroids on screen. Reduces medium asteroids to 2 smalls each. Reduces large asteroids to 2 mediums each.
-- **Stack/Limit:** Does not stack. Cannot appear before Level 5. Cannot drop again until 3 levels have been completed after the player last picked one up (not 3 levels after it drops — if the player misses it, the cooldown does not start).
+- **Type:** Consumable (manual trigger)
+- **Key:** `3`
+- **Effect:** Emits an expanding ring centered on the player's ship. Ring expands outward to max radius (400px). Asteroids caught by the ring are destroyed or downgraded (large → 2 medium, medium → 2 small, small → destroyed). Child asteroids spawned from a wave hit are immune to that same wave instance.
+- **Visual:** Colored expanding ring (not white).
+- **Stack/Limit:** Does not stack. Cannot appear before Level 5. Cannot drop again until 3 levels have been completed after the player last picked one up.
+
+---
+
+#### Shield
+- **Type:** Passive, one-time use
+- **Effect:** Creates a visible shield ring around the ship. Absorbs one direct asteroid hit — the colliding asteroid is destroyed (or split if large/medium), child fragments launch away from the player at 125% of the player's current speed in a ±25° fan. On shield break, player velocity is reduced by 75% to clear the immediate path.
+- **Hitbox:** Shield hitbox is 50% larger than the player ship radius. The shield only dies when an asteroid reaches the player hitbox — the larger ring is visual only.
+- **Stack/Limit:** One-time upgrade. Lost on ship destruction.
 
 ---
 
@@ -292,13 +302,13 @@ Ship does NOT reset position or velocity between waves. Momentum carries over.
 
 ## Phase 3
 
-### Scope
-- Feedback submission (Formspree)
-- Leaderboard access from Start Menu with Back navigation
-- High score highlight on leaderboard
-- Sound effects
-- Turn Radius power-up (new addition to loot table)
-- Mobile/touch support (separate fork — handled by nephew via GitHub repo)
+### Status
+- [x] Feedback submission (Formspree) — done, live on production
+- [x] Leaderboard access from Start Menu with Back navigation — done
+- [ ] High score highlight on leaderboard
+- [ ] Sound effects
+- [ ] Turn Radius power-up (new addition to loot table)
+- Mobile/touch support — separate fork, handled by nephew, not tracked here
 
 ---
 
