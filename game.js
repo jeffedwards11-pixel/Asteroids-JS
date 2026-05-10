@@ -148,7 +148,7 @@ function drawDebugOverlay() {
 
 const keys = {};
 document.addEventListener('keydown', e => {
-  if (e.target.tagName !== 'INPUT') e.preventDefault();
+  if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) e.preventDefault();
 
   if (isLocalhost && e.key === '`') {
     debugOverlay = !debugOverlay;
