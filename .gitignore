@@ -1,0 +1,16 @@
+# Credentials — never commit
+config.js
+.env
+
+# Dependencies
+node_modules/
+
+# Netlify local dev state
+.netlify/
+
+# OS noise
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

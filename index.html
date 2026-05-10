@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Asteroids</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: black; color: white; font-family: monospace; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+    canvas { display: block; }
+
+    .screen { position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; text-align: center; }
+    .screen.hidden { display: none; }
+
+    h1 { font-size: 64px; letter-spacing: 8px; }
+    h2 { font-size: 36px; letter-spacing: 4px; }
+    p  { font-size: 20px; color: #aaa; }
+
+    button { background: none; border: 2px solid white; color: white; font-family: monospace; font-size: 20px; padding: 10px 32px; cursor: pointer; letter-spacing: 2px; }
+    button:hover { background: white; color: black; }
+
+    input[type="text"] { background: none; border-bottom: 2px solid white; color: white; font-family: monospace; font-size: 24px; text-align: center; width: 260px; outline: none; padding: 4px; }
+
+    #score-display { position: absolute; top: 20px; left: 30px; font-size: 24px; }
+
+    table { border-collapse: collapse; width: 400px; }
+    th, td { padding: 8px 16px; text-align: left; font-size: 18px; }
+    th { color: #aaa; border-bottom: 1px solid #444; }
+    .section-label { font-size: 14px; color: #888; letter-spacing: 2px; margin-top: 16px; }
+  </style>
+</head>
+<body>
+
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- Live score -->
+  <div id="score-display" class="hidden">SCORE: <span id="score-value">0</span></div>
+
+  <!-- Start screen -->
+  <div id="screen-start" class="screen">
+    <h1>ASTEROIDS</h1>
+    <p>WASD to move &nbsp;|&nbsp; Space to shoot</p>
+    <button id="btn-start">PLAY</button>
+  </div>
+
+  <!-- Game over screen -->
+  <div id="screen-gameover" class="screen hidden">
+    <h2>GAME OVER</h2>
+    <p id="final-score"></p>
+    <label for="name-input">Enter your name:</label>
+    <input id="name-input" type="text" maxlength="20" placeholder="YOUR NAME" />
+    <button id="btn-submit">SUBMIT SCORE</button>
+  </div>
+
+  <!-- Leaderboard screen -->
+  <div id="screen-leaderboard" class="screen hidden">
+    <h2>LEADERBOARD</h2>
+    <p class="section-label">TOP 3 THIS WEEK</p>
+    <table id="table-weekly"><tbody></tbody></table>
+    <p class="section-label">TOP 10 ALL TIME</p>
+    <table id="table-alltime"><tbody></tbody></table>
+    <button id="btn-play-again">PLAY AGAIN</button>
+  </div>
+
+  <!-- Scripts — order matters -->
+  <script src="config.js"></script>
+  <script src="constants.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="leaderboard.js"></script>
+  <script src="game.js"></script>
+
+</body>
+</html>
